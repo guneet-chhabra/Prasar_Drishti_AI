@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prasar Drishti AI | Login</title>
+    <link rel="stylesheet" href="./styles/auth.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="brand-panel" aria-label="Project summary">
+        <div class="signal-grid"></div>
+        <p class="eyebrow">AI News & Sports Intelligence</p>
+        <h1>Prasar Drishti AI</h1>
+        <p class="lede">
+          Monitor NewsOnAir coverage, classify sentiment, and build predictive
+          intelligence for Indian sports and global football.
+        </p>
+
+        <div class="metric-row">
+          <div>
+            <span>03</span>
+            <small>Core modules</small>
+          </div>
+          <div>
+            <span>02</span>
+            <small>User roles</small>
+          </div>
+          <div>
+            <span>Live</span>
+            <small>Insight console</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="login-panel" aria-label="Login">
+        <div class="panel-heading">
+          <p class="eyebrow">Secure Access</p>
+          <h2>Sign in</h2>
+        </div>
+
+        <form id="loginForm" class="login-form">
+          <label>
+            Username
+            <input id="username" name="username" type="text" autocomplete="username" required />
+          </label>
+
+          <label>
+            Password
+            <input id="password" name="password" type="password" autocomplete="current-password" required />
+          </label>
+
+          <button type="submit">Login</button>
+          <p id="message" class="message" role="status"></p>
+        </form>
+
+        <div id="dashboard" class="dashboard hidden">
+          <div>
+            <p class="eyebrow">Session</p>
+            <h3 id="welcomeText"></h3>
+            <p id="roleText"></p>
+          </div>
+          <div class="action-row">
+            <button id="loadArticlesButton" class="secondary" type="button">Today</button>
+            <button id="loadArchiveButton" class="secondary" type="button">Archive</button>
+            <button id="scrapeButton" class="secondary hidden" type="button">Update Today</button>
+            <button id="lastMonthButton" class="secondary hidden" type="button">Scrape Last Month</button>
+            <button id="archiveTodayButton" class="secondary hidden" type="button">Archive Today</button>
+            <button id="adminButton" class="ghost hidden" type="button">Check Admin Access</button>
+          </div>
+          <section id="articlesPanel" class="articles-panel hidden" aria-label="Collected NewsOnAir data">
+            <div class="articles-heading">
+              <div>
+                <p class="eyebrow">Collected Data</p>
+                <h3>NewsOnAir Articles</h3>
+              </div>
+              <span id="articleCount">0 items</span>
+            </div>
+            <div id="articlesList" class="articles-list"></div>
+          </section>
+          <button id="logoutButton" class="ghost" type="button">Logout</button>
+        </div>
+
+        <div class="demo-box">
+          <strong>Demo accounts</strong>
+          <span>admin / admin123</span>
+          <span>user / user123</span>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app/auth.js"></script>
+  </body>
+</html>

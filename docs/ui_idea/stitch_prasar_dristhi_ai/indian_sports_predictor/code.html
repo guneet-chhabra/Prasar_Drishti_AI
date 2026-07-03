@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Prasar Drishti AI | Indian Sports Performance Prediction</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(11, 28, 48, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .signal-header {
+            border-bottom: 1px solid rgba(76, 215, 246, 0.2);
+        }
+        .frequency-pulse {
+            position: relative;
+        }
+        .frequency-pulse::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #4cd7f6;
+            box-shadow: 0 0 8px #4cd7f6;
+        }
+        .pulsing-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+<!-- Tailwind Theme Config Verbatim -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#0b1c30",
+                    "surface-container-high": "#1b2b3f",
+                    "surface": "#031427",
+                    "on-primary-fixed": "#131b2e",
+                    "error": "#ffb4ab",
+                    "error-container": "#93000a",
+                    "tertiary": "#4edea3",
+                    "on-background": "#d3e4fe",
+                    "primary-fixed": "#dae2fd",
+                    "on-error": "#690005",
+                    "secondary": "#4cd7f6",
+                    "on-primary-container": "#798098",
+                    "on-tertiary-fixed-variant": "#005236",
+                    "tertiary-container": "#001c10",
+                    "surface-container-lowest": "#000f21",
+                    "on-tertiary-container": "#009365",
+                    "inverse-on-surface": "#213145",
+                    "surface-container": "#102034",
+                    "on-secondary": "#003640",
+                    "secondary-container": "#03b5d3",
+                    "on-error-container": "#ffdad6",
+                    "primary": "#bec6e0",
+                    "background": "#031427",
+                    "inverse-primary": "#565e74",
+                    "inverse-surface": "#d3e4fe",
+                    "secondary-fixed-dim": "#4cd7f6",
+                    "tertiary-fixed": "#6ffbbe",
+                    "outline-variant": "#45464d",
+                    "outline": "#909097",
+                    "on-surface": "#d3e4fe",
+                    "surface-dim": "#031427",
+                    "primary-fixed-dim": "#bec6e0",
+                    "surface-tint": "#bec6e0",
+                    "surface-container-highest": "#26364a",
+                    "on-secondary-fixed": "#001f26",
+                    "surface-bright": "#2a3a4f",
+                    "on-tertiary": "#003824",
+                    "surface-variant": "#26364a",
+                    "primary-container": "#0f172a",
+                    "on-primary": "#283044",
+                    "on-surface-variant": "#c6c6cd",
+                    "on-secondary-fixed-variant": "#004e5c",
+                    "on-secondary-container": "#00424e",
+                    "on-primary-fixed-variant": "#3f465c",
+                    "secondary-fixed": "#acedff",
+                    "tertiary-fixed-dim": "#4edea3",
+                    "on-tertiary-fixed": "#002113"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "container-padding": "32px",
+                    "card-gap": "16px",
+                    "gutter": "24px",
+                    "base": "8px",
+                    "sidebar-width": "260px",
+                    "topbar-height": "72px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "data-mono": ["monospace"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen">
+<!-- SideNavBar (JSON Derived) -->
+<aside class="hidden lg:flex flex-col h-full py-base bg-surface-container-lowest fixed left-0 top-0 h-full w-sidebar-width border-r border-outline-variant/10 z-50">
+<div class="px-6 py-8 mb-8">
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight">Prasar Drishti</h1>
+<p class="font-label-md text-label-md text-on-surface-variant/70 uppercase mt-1">Command Center</p>
+</div>
+<nav class="flex-1 space-y-2 px-4">
+<div class="group flex items-center px-4 py-3 rounded hover:bg-surface-container-high transition-all cursor-pointer text-on-surface-variant">
+<span class="material-symbols-outlined mr-3">sensors</span>
+<span class="font-label-md text-label-md">Live Sentiment</span>
+</div>
+<div class="group flex items-center px-4 py-3 rounded hover:bg-surface-container-high transition-all cursor-pointer text-on-surface-variant">
+<span class="material-symbols-outlined mr-3">history</span>
+<span class="font-label-md text-label-md">Historical Data</span>
+</div>
+<div class="group flex items-center px-4 py-3 rounded hover:bg-surface-container-high transition-all cursor-pointer text-on-surface-variant">
+<span class="material-symbols-outlined mr-3">public</span>
+<span class="font-label-md text-label-md">India Analysis</span>
+</div>
+<div class="group flex items-center px-4 py-3 rounded bg-secondary-container/20 text-secondary border-r-4 border-secondary translate-x-1 transition-transform cursor-pointer">
+<span class="material-symbols-outlined mr-3">language</span>
+<span class="font-label-md text-label-md">World Predictor</span>
+</div>
+<div class="group flex items-center px-4 py-3 rounded hover:bg-surface-container-high transition-all cursor-pointer text-on-surface-variant">
+<span class="material-symbols-outlined mr-3">psychology</span>
+<span class="font-label-md text-label-md">Intelligence Hub</span>
+</div>
+</nav>
+<div class="px-4 py-6 border-t border-outline-variant/10 mt-auto">
+<button class="w-full bg-secondary text-on-secondary font-label-md text-label-md py-3 rounded-lg hover:scale-95 transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span>
+                Export Report
+            </button>
+<div class="mt-4 space-y-2">
+<div class="flex items-center px-4 py-2 text-on-surface-variant hover:text-on-surface cursor-pointer transition-colors">
+<span class="material-symbols-outlined mr-3 text-sm">chat_bubble</span>
+<span class="font-label-md text-label-md">Feedback</span>
+</div>
+<div class="flex items-center px-4 py-2 text-on-surface-variant hover:text-on-surface cursor-pointer transition-colors">
+<span class="material-symbols-outlined mr-3 text-sm">help_center</span>
+<span class="font-label-md text-label-md">Support</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="flex-1 lg:ml-sidebar-width min-h-screen flex flex-col">
+<!-- TopNavBar (JSON Derived) -->
+<header class="fixed top-0 right-0 left-0 lg:left-sidebar-width z-50 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/20 flex justify-between items-center px-container-padding h-topbar-height">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 md:hidden">
+<span class="material-symbols-outlined text-on-surface">menu</span>
+</div>
+<nav class="hidden md:flex gap-6">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors" href="#">Home</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors" href="#">Sentiment</a>
+<a class="font-label-md text-label-md text-secondary border-b-2 border-secondary pb-1" href="#">Sports Predictor</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden sm:flex items-center bg-surface-container-high/50 rounded-full px-4 py-1.5 border border-outline-variant/20">
+<span class="material-symbols-outlined text-outline text-sm mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm text-on-surface placeholder:text-outline w-40" placeholder="Search analytics..." type="text"/>
+</div>
+<span class="material-symbols-outlined text-secondary cursor-pointer">notifications</span>
+<span class="material-symbols-outlined text-on-surface cursor-pointer">settings</span>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-secondary/30">
+<img alt="User profile settings" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2sO1aD1Hn-2IrFAhhr79xalajJU2cN8EDylkWleRl949VVa7mxeu3wJxtlEuwY__15Je-1CbSPjng6AoaKTNE7s-4I6HfKFA_QTeVPSysvADf7Ao4r_OnFlQn7U9xqYiDo7CnEL-rca7eaSNLbIBUJhmr4-m2ddT2XMu0eJ6GSMt9meC6jSclY38608pGwm4nyL1W_qaUZQ6L3QrXaRZua_MRsN74Tu_jDWs2ENLnEjqB0mXi_QnP_d5oitpw6lSzi26y7JcjRBc"/>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="mt-topbar-height p-container-padding flex-1">
+<!-- Page Header & Sub-nav -->
+<div class="mb-gutter flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Indian Sports Performance</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Real-time AI synthesis of national athletic growth and predictive analytics.</p>
+</div>
+<!-- Sub-navigation pulse style -->
+<div class="flex gap-8">
+<button class="font-label-md text-label-md text-secondary frequency-pulse pb-1">India</button>
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-secondary transition-colors pb-1">World</button>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-card-gap">
+<!-- SDI Dashboard Card (Main KPI) -->
+<section class="col-span-12 lg:col-span-4 glass-card p-6 rounded-xl flex flex-col justify-between border-l-4 border-l-tertiary">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label-md text-label-md text-tertiary uppercase tracking-widest">Performance Index</span>
+<h3 class="font-headline-md text-headline-md mt-1">SDI Score</h3>
+</div>
+<div class="bg-tertiary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</div>
+</div>
+<div class="my-8 flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-on-surface">84.2</span>
+<span class="font-body-md text-body-md text-tertiary flex items-center">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                            +5.4%
+                        </span>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between font-label-md text-label-md">
+<span class="text-on-surface-variant">Public Sentiment</span>
+<span class="text-on-surface">High Positive</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[84%]"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant italic">"Surge in positive digital mentions following recent world championship gold."</p>
+</div>
+</section>
+<!-- Future Growth Prospects Trend Graph -->
+<article class="col-span-12 lg:col-span-8 glass-card p-6 rounded-xl overflow-hidden relative">
+<div class="signal-header pb-4 mb-4 flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm">insights</span>
+<h3 class="font-label-md text-label-md uppercase tracking-wider">Future Growth Prospects</h3>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-[10px] text-on-surface-variant">INDIA (PROJ)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="text-[10px] text-on-surface-variant">GLOBAL AVG</span>
+</div>
+</div>
+</div>
+<div class="h-48 w-full flex items-end gap-1 px-2">
+<!-- Simulated AI Trend Graph -->
+<div class="flex-1 bg-secondary/20 h-[30%] rounded-t-sm relative group cursor-help">
+<div class="absolute inset-x-0 bottom-0 bg-secondary h-full opacity-40"></div>
+</div>
+<div class="flex-1 bg-secondary/20 h-[35%] rounded-t-sm relative">
+<div class="absolute inset-x-0 bottom-0 bg-secondary h-full opacity-40"></div>
+</div>
+<div class="flex-1 bg-secondary/20 h-[45%] rounded-t-sm relative">
+<div class="absolute inset-x-0 bottom-0 bg-secondary h-full opacity-40"></div>
+</div>
+<div class="flex-1 bg-secondary/20 h-[42%] rounded-t-sm relative">
+<div class="absolute inset-x-0 bottom-0 bg-secondary h-full opacity-40"></div>
+</div>
+<div class="flex-1 bg-secondary/20 h-[60%] rounded-t-sm relative">
+<div class="absolute inset-x-0 bottom-0 bg-secondary h-full opacity-40 border-t-2 border-secondary shadow-[0_-4px_10px_rgba(76,215,246,0.3)]"></div>
+</div>
+<div class="flex-1 bg-secondary/20 h-[75%] rounded-t-sm relative">
+<div class="absolute inset-x-0 bottom-0 bg-secondary h-full opacity-40 border-t-2 border-secondary shadow-[0_-4px_10px_rgba(76,215,246,0.3)]"></div>
+</div>
+<div class="flex-1 bg-secondary/20 h-[90%] rounded-t-sm relative">
+<div class="absolute inset-x-0 bottom-0 bg-secondary h-full opacity-60 border-t-2 border-secondary shadow-[0_-4px_10px_rgba(76,215,246,0.3)]"></div>
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface px-2 py-1 border border-secondary text-[10px] rounded">2028 TARGET</div>
+</div>
+</div>
+<div class="mt-4 flex justify-between px-2 text-[10px] text-on-surface-variant font-data-mono">
+<span>2022</span>
+<span>2023</span>
+<span>2024</span>
+<span>2025</span>
+<span>2026 (EST)</span>
+<span>2027 (EST)</span>
+<span>2028 (PROJ)</span>
+</div>
+</article>
+<!-- Winning Probabilities Grid -->
+<section class="col-span-12 glass-card p-6 rounded-xl">
+<div class="signal-header pb-4 mb-6 flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm">workspace_premium</span>
+<h3 class="font-label-md text-label-md uppercase tracking-wider">Winning Probabilities</h3>
+</div>
+<span class="text-[10px] bg-secondary/10 text-secondary px-2 py-1 rounded border border-secondary/20">NEXT 180 DAYS</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Probability Item 1 -->
+<div class="bg-surface-container/40 p-4 rounded-lg border border-outline-variant/10 hover:border-secondary/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface">Paris Olympics '24</span>
+<span class="material-symbols-outlined text-outline text-lg">flag</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase">Javelin Throw (M)</p>
+<p class="font-headline-md text-headline-md text-secondary">92%</p>
+</div>
+<div class="pulsing-dot w-2 h-2 rounded-full bg-tertiary mb-2"></div>
+</div>
+</div>
+<!-- Probability Item 2 -->
+<div class="bg-surface-container/40 p-4 rounded-lg border border-outline-variant/10 hover:border-secondary/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface">Asian Games '26</span>
+<span class="material-symbols-outlined text-outline text-lg">sports_kabaddi</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase">Kabaddi (M/W)</p>
+<p class="font-headline-md text-headline-md text-secondary">88%</p>
+</div>
+<div class="pulsing-dot w-2 h-2 rounded-full bg-tertiary mb-2"></div>
+</div>
+</div>
+<!-- Probability Item 3 -->
+<div class="bg-surface-container/40 p-4 rounded-lg border border-outline-variant/10 hover:border-secondary/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface">World Cup 2024</span>
+<span class="material-symbols-outlined text-outline text-lg">sports_cricket</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase">Cricket (M)</p>
+<p class="font-headline-md text-headline-md text-secondary">76%</p>
+</div>
+<div class="pulsing-dot w-2 h-2 rounded-full bg-secondary mb-2"></div>
+</div>
+</div>
+<!-- Probability Item 4 -->
+<div class="bg-surface-container/40 p-4 rounded-lg border border-outline-variant/10 hover:border-secondary/50 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-md text-label-md text-on-surface">Chess Olympiad</span>
+<span class="material-symbols-outlined text-outline text-lg">poker_chip</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase">Grandmaster Ind.</p>
+<p class="font-headline-md text-headline-md text-secondary">81%</p>
+</div>
+<div class="pulsing-dot w-2 h-2 rounded-full bg-tertiary mb-2"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Athlete Spotlights -->
+<section class="col-span-12 glass-card p-6 rounded-xl">
+<div class="signal-header pb-4 mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm">person_search</span>
+<h3 class="font-label-md text-label-md uppercase tracking-wider">Athlete Spotlights</h3>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-card-gap">
+<!-- Athlete 1 -->
+<div class="flex gap-4 p-4 rounded-lg bg-surface-container-low border border-outline-variant/10">
+<div class="w-20 h-24 rounded-lg overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A heroic and dramatic studio portrait of a high-performance Indian javelin thrower in mid-motion. The lighting is cinematic, with high-contrast shadows and glowing cyan highlights that emphasize muscle definition and focus. The background is a dark, minimalist digital void with subtle frequency wave patterns, creating a sense of elite athletic intensity and modern technology." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6_GnJeLwWSOIBaLeZM427IwKDNUQ_mLFPQz189-pRsX5rM9_rpcFf9BZwyscvbae3s_E6J26IJFkK3E18VFcfqfHXIY8CyliesSUPa3421sKjDu2_mfbajaGkusg_3BUVAlkc9pX2Hteovkk4zyF9yxgc7FfbAimF0kyISV31mR_fIZLuSg_wZk4Muk2DmL478hO75bCzYj8GBJ2sCx0zlT1ygHQZhAV0xiTo-zv4gBwE4k2NdKirsbYk39QZggdDJ3-sIya7VFo"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Athlete A.</h4>
+<p class="text-[10px] text-on-surface-variant">Javelin Throw</p>
+</div>
+<div>
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] text-tertiary font-bold">MEDAL PROBABILITY</span>
+<span class="text-[10px] text-on-surface">94%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[94%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Athlete 2 -->
+<div class="flex gap-4 p-4 rounded-lg bg-surface-container-low border border-outline-variant/10">
+<div class="w-20 h-24 rounded-lg overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a world-class Indian archer focusing intensely on a target. The lighting is cold and precise, using a navy and emerald color palette to signify focus and calm. Subtle bokeh light particles float in the dark background, giving it a futuristic command center feel. High-end photography style with sharp detail on the archer's equipment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq9z0rUeZ10sLAwrS-JhFdMUB_4YW8-5vXgPric6PPsSQriTwze947iFz1ztI0ulthRU1wMnmZpwSB-jaCc5GWnanZnKcsKVOpeQVhPm6nE84XD2K53ZO7KzBH344j3KIxtIA9RKD-cjJXTAHL916TM5EX31TiilePezQYIY-3lPeLQNYOHcH2xKMFHRSiCTOBxaa8_PJ9XK8L-yE9loSTCEOCKXuuDCTbdokOQ8d2RaxMAeQcRgCpZDx2nPdHtPlhpD85I43hWrI"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Athlete B.</h4>
+<p class="text-[10px] text-on-surface-variant">Archery</p>
+</div>
+<div>
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] text-secondary font-bold">MEDAL PROBABILITY</span>
+<span class="text-[10px] text-on-surface">78%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[78%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Athlete 3 -->
+<div class="flex gap-4 p-4 rounded-lg bg-surface-container-low border border-outline-variant/10">
+<div class="w-20 h-24 rounded-lg overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A powerful studio portrait of a female Indian wrestler prepared for a match, expressing strength and resilience. The lighting uses warm amber and deep blue tones to create a sense of grounded power. The background features technical data overlays and geometric glass shards, adhering to a glassmorphic and tech-heavy aesthetic. The mood is authoritative and prepared." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYGQAQEOuLWR8F4iYPPQmGkVpsSs3w4gAikNA7TLhSR5SrK_WjMhmJMYc7ZUVkL2rQJt-jDy-sHrm1EzTQUpt_6AKrzS4eS6VGroe5zK0B8BIqzhBWCBguH7aeVxV-GDlx7Jp2UYLD_cM44gtt3KNYi7ln3EdWuezw7gEhqCyHdUIzF-nu_bJrqM74PBdpjAoNdGw1FQh5F2ldLtvuAe4aXX70eY-rc3ADNCk4-6O-Rf-e7bdMpZx1u48kalAG3wj2VT7zsFKVB5Q"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Athlete C.</h4>
+<p class="text-[10px] text-on-surface-variant">Wrestling</p>
+</div>
+<div>
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] text-tertiary font-bold">MEDAL PROBABILITY</span>
+<span class="text-[10px] text-on-surface">82%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[82%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Footer (JSON Derived) -->
+<footer class="w-full flex flex-col md:flex-row justify-between items-center py-base px-container-padding mt-auto bg-surface-container-low border-t border-outline-variant/10">
+<div class="flex flex-col items-center md:items-start gap-1">
+<p class="font-label-md text-label-md font-semibold text-on-surface">Prasar Drishti AI</p>
+<p class="font-body-sm text-body-sm text-outline">© 2024 Prasar Drishti AI. All rights reserved.</p>
+</div>
+<nav class="flex gap-6 mt-4 md:mt-0">
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Project Goals</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Doordarshan Bhawan</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Akashwani Bhawan</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" href="#">Future Scopes</a>
+</nav>
+</footer>
+</main>
+<script>
+        // Micro-interactions and interactive pulse logic
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.style.transition = 'transform 0.3s ease';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Simulating live data update for the SDI score
+        setInterval(() => {
+            const scoreEl = document.querySelector('.font-display-lg');
+            if (scoreEl) {
+                let current = parseFloat(scoreEl.innerText);
+                let drift = (Math.random() - 0.5) * 0.1;
+                scoreEl.innerText = (current + drift).toFixed(1);
+            }
+        }, 3000);
+    </script>
+</body></html>
