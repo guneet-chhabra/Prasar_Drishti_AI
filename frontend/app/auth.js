@@ -1,7 +1,7 @@
 const hostName = window.location.hostname || "localhost";
 const API_BASE_URL = (hostName === "localhost" || hostName === "127.0.0.1")
   ? `http://${hostName}:5000/api`
-  : "https://prasar-drishti-ai.onrender.com";
+  : "https://prasar-drishti-ai.onrender.com/api";
 
 const loginForm = document.querySelector("#loginForm");
 const message = document.querySelector("#message");
