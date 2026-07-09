@@ -516,8 +516,8 @@ async function checkAuth() {
 
     } catch (err) {
         console.warn("Session validation failed. Redirecting to login...", err);
-        localStorage.removeItem(TOKEN_KEY);
-        window.location.href = "index.html";
+        // localStorage.removeItem(TOKEN_KEY);
+        // window.location.href = "index.html";
     }
 }
 
