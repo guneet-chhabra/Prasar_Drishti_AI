@@ -1,5 +1,7 @@
 const hostName = window.location.hostname || "localhost";
-const API_BASE_URL = `http://${hostName}:5000/api`;
+const API_BASE_URL = (hostName === "localhost" || hostName === "127.0.0.1")
+    ? `http://${hostName}:5000/api`
+    : "https://prasar-drishti-ai.onrender.com/api";
 const TOKEN_KEY = "prasar_drishti_token";
 
 let currentUser = null;
@@ -516,8 +518,8 @@ async function checkAuth() {
 
     } catch (err) {
         console.warn("Session validation failed. Redirecting to login...", err);
-        // localStorage.removeItem(TOKEN_KEY);
-        // window.location.href = "index.html";
+        localStorage.removeItem(TOKEN_KEY);
+        window.location.href = "index.html";
     }
 }
 
