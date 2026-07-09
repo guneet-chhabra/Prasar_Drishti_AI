@@ -337,6 +337,9 @@ def get_sentiment_trends_data(dataset: str, admin_view: bool = False) -> dict | 
         from ml.train_sentiment import load_model_and_predict_batch
         predictions = load_model_and_predict_batch(texts)
     except Exception as exc:
+        import traceback
+        print("EXCEPTION IN SENTIMENT PREDICTION:")
+        traceback.print_exc()
         # Fallback inline classifier
         predictions = []
         for text in texts:
