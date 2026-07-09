@@ -1,7 +1,5 @@
 const hostName = window.location.hostname || "localhost";
-const API_BASE_URL = (hostName === "localhost" || hostName === "127.0.0.1")
-  ? `http://${hostName}:5000/api`
-  : "hhttps://prasar-drishti-ai.onrender.com/api"; 
+const API_BASE_URL = `http://${hostName}:5000/api`;
 const TOKEN_KEY = "prasar_drishti_token";
 
 let currentUser = null;
@@ -73,7 +71,9 @@ const groupsStandingsGrid = document.getElementById("groupsStandingsGrid");
 
 // Admin Buttons
 const btnScrapeToday = document.getElementById("btnScrapeToday");
+const btnScrapeTheHindu = document.getElementById("btnScrapeTheHindu");
 const btnScrapeArchive = document.getElementById("btnScrapeArchive");
+const btnScrapeTheHinduArchive = document.getElementById("btnScrapeTheHinduArchive");
 const btnArchiveToday = document.getElementById("btnArchiveToday");
 const btnRetrainModel = document.getElementById("btnRetrainModel");
 const btnLogout = document.getElementById("btnLogout");
@@ -159,12 +159,42 @@ function switchTab(tabId) {
 // Load Sentiment Trends & Articles
 async function loadSentimentData(dataset) {
     currentDataset = dataset;
-    if (dataset === 'today') {
-        btnToday.className = "pb-base font-label-md text-label-md text-secondary frequency-pulse";
-        btnArchive.className = "pb-base font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors";
+    
+    const btnToday = document.getElementById("btnDatasetToday");
+    const btnArchive = document.getElementById("btnDatasetArchive");
+    const btnHinduToday = document.getElementById("btnDatasetHinduToday");
+    const btnHinduArchive = document.getElementById("btnDatasetHinduArchive");
+    const btnComparison = document.getElementById("btnDatasetComparison");
+
+    const buttons = [
+        { id: "today", elem: btnToday },
+        { id: "archive", elem: btnArchive },
+        { id: "thehindu_today", elem: btnHinduToday },
+        { id: "thehindu_archive", elem: btnHinduArchive },
+        { id: "comparison", elem: btnComparison }
+    ];
+
+    buttons.forEach(btn => {
+        if (btn.elem) {
+            if (btn.id === dataset) {
+                btn.elem.className = "pb-base font-label-md text-label-md text-secondary frequency-pulse";
+            } else {
+                btn.elem.className = "pb-base font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors";
+            }
+        }
+    });
+
+    const singleView = document.getElementById("sentimentSingleView");
+    const comparisonView = document.getElementById("sentimentComparisonView");
+
+    if (dataset === "comparison") {
+        if (singleView) singleView.classList.add("hidden");
+        if (comparisonView) comparisonView.classList.remove("hidden");
+        loadComparisonData();
+        return;
     } else {
-        btnToday.className = "pb-base font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors";
-        btnArchive.className = "pb-base font-label-md text-label-md text-secondary frequency-pulse";
+        if (singleView) singleView.classList.remove("hidden");
+        if (comparisonView) comparisonView.classList.add("hidden");
     }
 
     const colCount = (currentUser && currentUser.role === 'admin') ? 5 : 4;
@@ -202,12 +232,23 @@ function renderSentimentDashboard(data) {
             "Neutral": "text-secondary font-bold",
             "Anti-Govt": "text-error font-bold"
         };
-        tickerContent.innerHTML = articles.map(art => `
-            <span class="flex items-center gap-2 font-data-mono text-body-sm text-on-surface">
-                <span class="text-tertiary">#NewsOnAir:</span> ${escapeHtml(art.title)} 
-                <span class="${sentimentColors[art.sentiment_name] || 'text-outline'}">[${art.sentiment_name.toUpperCase()}]</span>
-            </span>
-        `).join("");
+        tickerContent.innerHTML = articles.map(art => {
+            const hashtag = art.url.includes("thehindu.com") ? "#TheHindu:" : "#NewsOnAir:";
+            return `
+                <span class="flex items-center gap-2 font-data-mono text-body-sm text-on-surface">
+                    <span class="text-tertiary">${hashtag}</span> ${escapeHtml(art.title)} 
+                    <span class="${sentimentColors[art.sentiment_name] || 'text-outline'}">[${art.sentiment_name.toUpperCase()}]</span>
+                </span>
+            `;
+        }).join("");
+        
+        // Dynamically adjust marquee speed so it's a decent speed for any number of articles
+        setTimeout(() => {
+            const width = tickerContent.scrollWidth || 1000;
+            const speed = 75; // pixels per second
+            const duration = Math.max(15, width / speed);
+            tickerContent.style.animationDuration = `${duration}s`;
+        }, 50);
     }
 
     const colCount = isAdmin ? 5 : 4;
@@ -535,6 +576,51 @@ btnScrapeArchive.addEventListener("click", async () => {
         btnScrapeArchive.disabled = false;
     }
 });
+
+if (btnScrapeTheHindu) {
+    btnScrapeTheHindu.addEventListener("click", async () => {
+        btnScrapeTheHindu.disabled = true;
+        showStatus("Running scraper for The Hindu. Please wait...");
+        try {
+            const res = await api("/news/scrape-thehindu", {
+                method: "POST",
+                body: JSON.stringify({
+                    categories: ["national", "international", "business", "sports", "miscellaneous"],
+                    limit: 10,
+                    pages: 3
+                })
+            });
+            showStatus(`Scrape completed! Scraped ${res.count} articles from The Hindu.`);
+            if (currentDataset === "thehindu_today" || currentDataset === "thehindu_archive") {
+                await loadSentimentData(currentDataset);
+            }
+        } catch (err) {
+            showStatus(`Scrape failed: ${err.message}`, true);
+        } finally {
+            btnScrapeTheHindu.disabled = false;
+        }
+    });
+}
+if (btnScrapeTheHinduArchive) {
+    btnScrapeTheHinduArchive.addEventListener("click", async () => {
+        btnScrapeTheHinduArchive.disabled = true;
+        showStatus("Triggering historical scrape of The Hindu for the last 30 days in the background...");
+        try {
+            const res = await api("/news/scrape-thehindu-last-month", { method: "POST" });
+            showStatus(res.message);
+            // Refresh archive list after 5 seconds to show initial progress
+            setTimeout(() => {
+                if (currentDataset === "thehindu_archive") {
+                    loadSentimentData("thehindu_archive");
+                }
+            }, 5000);
+        } catch (err) {
+            showStatus(`Archive scrape failed: ${err.message}`, true);
+        } finally {
+            btnScrapeTheHinduArchive.disabled = false;
+        }
+    });
+}
 
 btnArchiveToday.addEventListener("click", async () => {
     btnArchiveToday.disabled = true;
@@ -1238,6 +1324,259 @@ if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", attachDashboardEventHandlers);
 } else {
     attachDashboardEventHandlers();
+}
+
+let distChartInstance = null;
+let timelineChartInstance = null;
+
+async function loadComparisonData() {
+    try {
+        const adminViewParam = currentUser && currentUser.role === 'admin' ? '?admin_view=true' : '';
+        const data = await api(`/news/sentiment-comparison${adminViewParam}`);
+        renderComparisonDashboard(data);
+    } catch (err) {
+        showStatus(`Failed to load comparison: ${err.message}`, true);
+    }
+}
+
+function renderComparisonDashboard(data) {
+    const noa = data.newsonair || { distribution: {}, category_breakdown: {}, timeline: {}, count: 0 };
+    const hindu = data.thehindu || { distribution: {}, category_breakdown: {}, timeline: {}, count: 0 };
+
+    // NewsOnAir GFI
+    const noaDist = noa.distribution || { "Pro-Govt": 0, "Neutral": 0, "Anti-Govt": 0 };
+    const noaTotal = (noaDist["Pro-Govt"] || 0) + (noaDist["Neutral"] || 0) + (noaDist["Anti-Govt"] || 0);
+    const noaGfi = noaTotal > 0 ? (((noaDist["Pro-Govt"] || 0) / noaTotal) * 100).toFixed(0) : 0;
+    document.getElementById("noaGfiValue").textContent = `${noaGfi}%`;
+
+    // The Hindu GFI
+    const hinduDist = hindu.distribution || { "Pro-Govt": 0, "Neutral": 0, "Anti-Govt": 0 };
+    const hinduTotal = (hinduDist["Pro-Govt"] || 0) + (hinduDist["Neutral"] || 0) + (hinduDist["Anti-Govt"] || 0);
+    const hinduGfi = hinduTotal > 0 ? (((hinduDist["Pro-Govt"] || 0) / hinduTotal) * 100).toFixed(0) : 0;
+    document.getElementById("hinduGfiValue").textContent = `${hinduGfi}%`;
+
+    // Total Articles
+    document.getElementById("totalComparisonArticles").textContent = noa.count + hindu.count;
+
+    // Charts: Distribution Bar Chart (using percentages)
+    const noaPro = noaDist["Pro-Govt"] || 0;
+    const noaNeu = noaDist["Neutral"] || 0;
+    const noaAnti = noaDist["Anti-Govt"] || 0;
+    const noaTotalDist = noaPro + noaNeu + noaAnti;
+    const noaProPct = noaTotalDist > 0 ? (noaPro / noaTotalDist) * 100 : 0;
+    const noaNeuPct = noaTotalDist > 0 ? (noaNeu / noaTotalDist) * 100 : 0;
+    const noaAntiPct = noaTotalDist > 0 ? (noaAnti / noaTotalDist) * 100 : 0;
+
+    const hinduPro = hinduDist["Pro-Govt"] || 0;
+    const hinduNeu = hinduDist["Neutral"] || 0;
+    const hinduAnti = hinduDist["Anti-Govt"] || 0;
+    const hinduTotalDist = hinduPro + hinduNeu + hinduAnti;
+    const hinduProPct = hinduTotalDist > 0 ? (hinduPro / hinduTotalDist) * 100 : 0;
+    const hinduNeuPct = hinduTotalDist > 0 ? (hinduNeu / hinduTotalDist) * 100 : 0;
+    const hinduAntiPct = hinduTotalDist > 0 ? (hinduAnti / hinduTotalDist) * 100 : 0;
+
+    const ctxDist = document.getElementById("comparisonDistChart").getContext("2d");
+    if (distChartInstance) distChartInstance.destroy();
+
+    distChartInstance = new Chart(ctxDist, {
+        type: 'bar',
+        data: {
+            labels: ['Pro-Government', 'Neutral', 'Anti-Government'],
+            datasets: [
+                {
+                    label: 'NewsOnAir',
+                    data: [noaProPct, noaNeuPct, noaAntiPct],
+                    backgroundColor: 'rgba(78, 222, 163, 0.75)', // Green
+                    borderColor: 'rgb(78, 222, 163)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'The Hindu',
+                    data: [hinduProPct, hinduNeuPct, hinduAntiPct],
+                    backgroundColor: 'rgba(255, 180, 171, 0.75)', // Red
+                    borderColor: 'rgb(255, 180, 171)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#e1e2e5' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toFixed(1) + '%';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#c4c6cf' }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        color: '#c4c6cf',
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Charts: Timeline Trend Line Chart
+    const noaTimeline = noa.timeline || {};
+    const hinduTimeline = hindu.timeline || {};
+
+    const allDates = Array.from(new Set([
+        ...Object.keys(noaTimeline),
+        ...Object.keys(hinduTimeline)
+    ])).filter(d => d !== "Unknown").sort();
+
+    const noaTrendData = allDates.map(date => {
+        const stats = noaTimeline[date];
+        if (!stats) return null;
+        const pro = stats["Pro-Govt"] || 0;
+        const anti = stats["Anti-Govt"] || 0;
+        const total = stats["total"] || 0;
+        return total > 0 ? (pro - anti) / total : 0;
+    });
+
+    const hinduTrendData = allDates.map(date => {
+        const stats = hinduTimeline[date];
+        if (!stats) return null;
+        const pro = stats["Pro-Govt"] || 0;
+        const anti = stats["Anti-Govt"] || 0;
+        const total = stats["total"] || 0;
+        return total > 0 ? (pro - anti) / total : 0;
+    });
+
+    const ctxTimeline = document.getElementById("comparisonTimelineChart").getContext("2d");
+    if (timelineChartInstance) timelineChartInstance.destroy();
+
+    timelineChartInstance = new Chart(ctxTimeline, {
+        type: 'line',
+        data: {
+            labels: allDates,
+            datasets: [
+                {
+                    label: 'NewsOnAir',
+                    data: noaTrendData,
+                    borderColor: 'rgb(78, 222, 163)',
+                    backgroundColor: 'rgba(78, 222, 163, 0.1)',
+                    tension: 0.3,
+                    spanGaps: true
+                },
+                {
+                    label: 'The Hindu',
+                    data: hinduTrendData,
+                    borderColor: 'rgb(255, 180, 171)',
+                    backgroundColor: 'rgba(255, 180, 171, 0.1)',
+                    tension: 0.3,
+                    spanGaps: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#e1e2e5' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toFixed(2) + ' (Net)';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#c4c6cf' }
+                },
+                y: {
+                    min: -1.0,
+                    max: 1.0,
+                    ticks: {
+                        color: '#c4c6cf',
+                        callback: function(value) {
+                            if (value === 1.0) return "+1.0 (Pro)";
+                            if (value === 0.0) return "0.0 (Neu)";
+                            if (value === -1.0) return "-1.0 (Anti)";
+                            return value.toFixed(1);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Category Breakdown Table
+    const noaCat = noa.category_breakdown || {};
+    const hinduCat = hindu.category_breakdown || {};
+    const allCats = ["national", "international", "business", "sports", "miscellaneous"];
+    
+    const tableBody = document.getElementById("comparisonCategoryTableBody");
+    tableBody.innerHTML = allCats.map(cat => {
+        const nStats = noaCat[cat] || { "Pro-Govt": 0, "Neutral": 0, "Anti-Govt": 0, total: 0 };
+        const hStats = hinduCat[cat] || { "Pro-Govt": 0, "Neutral": 0, "Anti-Govt": 0, total: 0 };
+
+        const nStr = `${nStats["Pro-Govt"]} / ${nStats["Neutral"]} / ${nStats["Anti-Govt"]}`;
+        const hStr = `${hStats["Pro-Govt"]} / ${hStats["Neutral"]} / ${hStats["Anti-Govt"]}`;
+
+        let contrastText = "Insufficient data for comparison.";
+        if (nStats.total > 0 && hStats.total > 0) {
+            const nProRatio = nStats["Pro-Govt"] / nStats.total;
+            const hProRatio = hStats["Pro-Govt"] / hStats.total;
+            const nAntiRatio = nStats["Anti-Govt"] / nStats.total;
+            const hAntiRatio = hStats["Anti-Govt"] / hStats.total;
+
+            if (Math.abs(nProRatio - hProRatio) < 0.15) {
+                contrastText = "Both portals display similar sentiment coverage.";
+            } else if (nProRatio > hProRatio) {
+                contrastText = `NewsOnAir is more positive (+${((nProRatio - hProRatio)*100).toFixed(0)}% Pro-Govt) than The Hindu.`;
+            } else {
+                contrastText = `The Hindu is more positive (+${((hProRatio - nProRatio)*100).toFixed(0)}% Pro-Govt) than NewsOnAir.`;
+            }
+
+            if (hAntiRatio > nAntiRatio + 0.15) {
+                contrastText += ` The Hindu shows significantly higher critical coverage (+${((hAntiRatio - nAntiRatio)*100).toFixed(0)}% Anti-Govt).`;
+            }
+        } else if (nStats.total > 0) {
+            contrastText = "Only NewsOnAir coverage present.";
+        } else if (hStats.total > 0) {
+            contrastText = "Only The Hindu coverage present.";
+        }
+
+        return `
+            <tr class="hover:bg-surface-container-high transition-colors">
+                <td class="p-4 font-body-md text-on-surface capitalize font-semibold">${cat}</td>
+                <td class="p-4 text-center font-data-mono text-tertiary">${nStr} <span class="text-xs text-outline">(${nStats.total})</span></td>
+                <td class="p-4 text-center font-data-mono text-error">${hStr} <span class="text-xs text-outline">(${hStats.total})</span></td>
+                <td class="p-4 font-body-sm text-on-surface-variant">${contrastText}</td>
+            </tr>
+        `;
+    }).join("");
 }
 
 // Run auth check on initialization

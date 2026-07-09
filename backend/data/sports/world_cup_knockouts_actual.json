@@ -82,12 +82,12 @@
   "r32_9": {
     "team1": "Belgium",
     "team2": "Senegal",
-    "score1": 2,
-    "score2": 1,
+    "score1": 3,
+    "score2": 2,
     "winner": "Belgium",
     "confidence": 1.0,
     "status": "FINISHED",
-    "outcome": "Belgium Win (Actual: 2-1)"
+    "outcome": "Belgium Win (Actual: 3-2 AET)"
   },
   "r32_10": {
     "team1": "United States",
@@ -98,5 +98,145 @@
     "confidence": 1.0,
     "status": "FINISHED",
     "outcome": "United States Win (Actual: 2-0)"
+  },
+  "r32_11": {
+    "team1": "Spain",
+    "team2": "Austria",
+    "score1": 3,
+    "score2": 0,
+    "winner": "Spain",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Spain Win (Actual: 3-0)"
+  },
+  "r32_12": {
+    "team1": "Portugal",
+    "team2": "Croatia",
+    "score1": 2,
+    "score2": 1,
+    "winner": "Portugal",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Portugal Win (Actual: 2-1)"
+  },
+  "r32_13": {
+    "team1": "Switzerland",
+    "team2": "Algeria",
+    "score1": 2,
+    "score2": 1,
+    "winner": "Switzerland",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Switzerland Win (Actual: 2-1)"
+  },
+  "r32_14": {
+    "team1": "Australia",
+    "team2": "Egypt",
+    "score1": 1,
+    "score2": 1,
+    "winner": "Egypt",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Egypt Win (Actual: 1-1, 4-2 pens)"
+  },
+  "r32_15": {
+    "team1": "Argentina",
+    "team2": "Cape Verde",
+    "score1": 3,
+    "score2": 2,
+    "winner": "Argentina",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Argentina Win (Actual: 3-2)"
+  },
+  "r32_16": {
+    "team1": "Colombia",
+    "team2": "Ghana",
+    "score1": 1,
+    "score2": 0,
+    "winner": "Colombia",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Colombia Win (Actual: 1-0)"
+  },
+  "r16_1": {
+    "team1": "Norway",
+    "team2": "Brazil",
+    "score1": 2,
+    "score2": 0,
+    "winner": "Norway",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Norway Win (Actual: 2-0)"
+  },
+  "r16_2": {
+    "team1": "France",
+    "team2": "Paraguay",
+    "score1": 2,
+    "score2": 0,
+    "winner": "France",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "France Win (Actual: 2-0)"
+  },
+  "r16_3": {
+    "team1": "England",
+    "team2": "Mexico",
+    "score1": 3,
+    "score2": 2,
+    "winner": "England",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "England Win (Actual: 3-2)"
+  },
+  "r16_4": {
+    "team1": "Belgium",
+    "team2": "United States",
+    "score1": 4,
+    "score2": 1,
+    "winner": "Belgium",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Belgium Win (Actual: 4-1)"
+  },
+  "r16_5": {
+    "team1": "Spain",
+    "team2": "Portugal",
+    "score1": 2,
+    "score2": 1,
+    "winner": "Spain",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Spain Win (Actual: 2-1)"
+  },
+  "r16_6": {
+    "team1": "Switzerland",
+    "team2": "Colombia",
+    "score1": 0,
+    "score2": 0,
+    "winner": "Switzerland",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Switzerland Win (Actual: 0-0, 4-3 pens)"
+  },
+  "r16_7": {
+    "team1": "Argentina",
+    "team2": "Egypt",
+    "score1": 3,
+    "score2": 2,
+    "winner": "Argentina",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Argentina Win (Actual: 3-2)"
+  },
+  "r16_8": {
+    "team1": "Morocco",
+    "team2": "Canada",
+    "score1": 2,
+    "score2": 1,
+    "winner": "Morocco",
+    "confidence": 1.0,
+    "status": "FINISHED",
+    "outcome": "Morocco Win (Actual: 2-1)"
   }
 }

@@ -273,14 +273,14 @@ def run_monte_carlo(model, base_stats, rankings, groups, matches_state, actual_k
             r16_counts[winner] += 1
             
         r16_matchups = [
-            (r16_teams[0], r16_teams[1]),
-            (r16_teams[2], r16_teams[3]),
-            (r16_teams[4], r16_teams[5]),
-            (r16_teams[6], r16_teams[7]),
-            (r16_teams[8], r16_teams[9]),
-            (r16_teams[10], r16_teams[11]),
-            (r16_teams[12], r16_teams[13]),
-            (r16_teams[14], r16_teams[15])
+            (r16_teams[4], r16_teams[1]),   # Norway vs Brazil (r32_5 vs r32_2)
+            (r16_teams[5], r16_teams[2]),   # France vs Paraguay (r32_6 vs r32_3)
+            (r16_teams[7], r16_teams[6]),   # England vs Mexico (r32_8 vs r32_7)
+            (r16_teams[8], r16_teams[9]),   # Belgium vs USA (r32_9 vs r32_10)
+            (r16_teams[10], r16_teams[11]), # Spain vs Portugal (r32_11 vs r32_12)
+            (r16_teams[12], r16_teams[15]), # Switzerland vs Colombia (r32_13 vs r32_16)
+            (r16_teams[14], r16_teams[13]), # Argentina vs Egypt (r32_15 vs r32_14)
+            (r16_teams[3], r16_teams[0])    # Morocco vs Canada (r32_4 vs r32_1)
         ]
         
         qf_teams = []
@@ -301,10 +301,10 @@ def run_monte_carlo(model, base_stats, rankings, groups, matches_state, actual_k
             qf_counts[winner] += 1
             
         qf_matchups = [
-            (qf_teams[0], qf_teams[1]),
-            (qf_teams[2], qf_teams[3]),
-            (qf_teams[4], qf_teams[5]),
-            (qf_teams[6], qf_teams[7])
+            (qf_teams[1], qf_teams[7]), # France vs Morocco (match 2 vs match 8)
+            (qf_teams[4], qf_teams[3]), # Spain vs Belgium (match 5 vs match 4)
+            (qf_teams[0], qf_teams[2]), # Norway vs England (match 1 vs match 3)
+            (qf_teams[6], qf_teams[5])  # Argentina vs Switzerland (match 7 vs match 6)
         ]
         
         sf_teams = []
@@ -493,14 +493,14 @@ def get_predictions():
         
     # Draw up Round of 16 matches
     r16_matches = [
-        {"id": "r16_1", "team1": r32_matches[0]["winner"], "team2": r32_matches[1]["winner"]},
-        {"id": "r16_2", "team1": r32_matches[2]["winner"], "team2": r32_matches[3]["winner"]},
-        {"id": "r16_3", "team1": r32_matches[4]["winner"], "team2": r32_matches[5]["winner"]},
-        {"id": "r16_4", "team1": r32_matches[6]["winner"], "team2": r32_matches[7]["winner"]},
-        {"id": "r16_5", "team1": r32_matches[8]["winner"], "team2": r32_matches[9]["winner"]},
-        {"id": "r16_6", "team1": r32_matches[10]["winner"], "team2": r32_matches[11]["winner"]},
-        {"id": "r16_7", "team1": r32_matches[12]["winner"], "team2": r32_matches[13]["winner"]},
-        {"id": "r16_8", "team1": r32_matches[14]["winner"], "team2": r32_matches[15]["winner"]}
+        {"id": "r16_1", "team1": r32_matches[4]["winner"], "team2": r32_matches[1]["winner"]},   # Norway vs Brazil
+        {"id": "r16_2", "team1": r32_matches[5]["winner"], "team2": r32_matches[2]["winner"]},   # France vs Paraguay
+        {"id": "r16_3", "team1": r32_matches[7]["winner"], "team2": r32_matches[6]["winner"]},   # England vs Mexico
+        {"id": "r16_4", "team1": r32_matches[8]["winner"], "team2": r32_matches[9]["winner"]},   # Belgium vs USA
+        {"id": "r16_5", "team1": r32_matches[10]["winner"], "team2": r32_matches[11]["winner"]}, # Spain vs Portugal
+        {"id": "r16_6", "team1": r32_matches[12]["winner"], "team2": r32_matches[15]["winner"]}, # Switzerland vs Colombia
+        {"id": "r16_7", "team1": r32_matches[14]["winner"], "team2": r32_matches[13]["winner"]}, # Argentina vs Egypt
+        {"id": "r16_8", "team1": r32_matches[3]["winner"], "team2": r32_matches[0]["winner"]}    # Morocco vs Canada
     ]
     
     for idx, match in enumerate(r16_matches, 1):
@@ -527,10 +527,10 @@ def get_predictions():
         
     # Draw up Quarterfinals
     qf_matches = [
-        {"id": "qf_1", "team1": r16_matches[0]["winner"], "team2": r16_matches[1]["winner"]},
-        {"id": "qf_2", "team1": r16_matches[2]["winner"], "team2": r16_matches[3]["winner"]},
-        {"id": "qf_3", "team1": r16_matches[4]["winner"], "team2": r16_matches[5]["winner"]},
-        {"id": "qf_4", "team1": r16_matches[6]["winner"], "team2": r16_matches[7]["winner"]}
+        {"id": "qf_1", "team1": r16_matches[1]["winner"], "team2": r16_matches[7]["winner"]}, # France vs Morocco (r16_2 vs r16_8)
+        {"id": "qf_2", "team1": r16_matches[4]["winner"], "team2": r16_matches[3]["winner"]}, # Spain vs Belgium (r16_5 vs r16_4)
+        {"id": "qf_3", "team1": r16_matches[0]["winner"], "team2": r16_matches[2]["winner"]}, # Norway vs England (r16_1 vs r16_3)
+        {"id": "qf_4", "team1": r16_matches[6]["winner"], "team2": r16_matches[5]["winner"]}  # Argentina vs Switzerland (r16_7 vs r16_6)
     ]
     
     for idx, match in enumerate(qf_matches, 1):

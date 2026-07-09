@@ -6,6 +6,7 @@
     <title>Prasar Drishti AI | Dashboard</title>
     <!-- Tailwind CSS with CDN -->
     <script src="./tailwind.js?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <style>
@@ -207,9 +208,17 @@
                     <span class="material-symbols-outlined text-sm">download</span>
                     Update Today
                 </button>
+                <button id="btnScrapeTheHindu" class="w-full flex items-center gap-2 p-2 rounded text-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface text-left transition-all">
+                    <span class="material-symbols-outlined text-sm">download</span>
+                    Scrape The Hindu
+                </button>
                 <button id="btnScrapeArchive" class="w-full flex items-center gap-2 p-2 rounded text-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface text-left transition-all">
                     <span class="material-symbols-outlined text-sm">history</span>
                     Scrape Last Month
+                </button>
+                <button id="btnScrapeTheHinduArchive" class="w-full flex items-center gap-2 p-2 rounded text-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface text-left transition-all">
+                    <span class="material-symbols-outlined text-sm">history</span>
+                    Scrape The Hindu Archive
                 </button>
                 <button id="btnArchiveToday" class="w-full flex items-center gap-2 p-2 rounded text-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface text-left transition-all">
                     <span class="material-symbols-outlined text-sm">archive</span>
@@ -429,149 +438,245 @@
         <!-- TAB 2: SENTIMENT ANALYSIS VIEW -->
         <div id="tabContentSentiment" class="tab-content">
             <!-- Sub-navigation -->
-            <div class="flex items-center gap-gutter mb-gutter border-b border-outline-variant/10">
-                <button id="btnDatasetToday" class="pb-base font-label-md text-label-md text-secondary frequency-pulse" onclick="loadSentimentData('today')">Live Today</button>
-                <button id="btnDatasetArchive" class="pb-base font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" onclick="loadSentimentData('archive')">Previous Archive</button>
+            <div class="flex flex-wrap items-center gap-gutter mb-gutter border-b border-outline-variant/10">
+                <button id="btnDatasetToday" class="pb-base font-label-md text-label-md text-secondary frequency-pulse" onclick="loadSentimentData('today')">NewsOnAir Live</button>
+                <button id="btnDatasetArchive" class="pb-base font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" onclick="loadSentimentData('archive')">NewsOnAir Archive</button>
+                <button id="btnDatasetHinduToday" class="pb-base font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" onclick="loadSentimentData('thehindu_today')">The Hindu Live</button>
+                <button id="btnDatasetHinduArchive" class="pb-base font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" onclick="loadSentimentData('thehindu_archive')">The Hindu Archive</button>
+                <button id="btnDatasetComparison" class="pb-base font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" onclick="loadSentimentData('comparison')">Comparison</button>
             </div>
 
-            <!-- Real-time Sentiment Ticker -->
-            <div class="glass-card mb-gutter rounded-xl overflow-hidden flex items-center">
-                <div class="bg-secondary px-4 py-2 text-on-secondary font-label-md flex items-center gap-2 whitespace-nowrap">
-                    <span class="material-symbols-outlined status-dot text-[16px]" style="font-variation-settings: 'FILL' 1;">radio_button_checked</span>
-                    LIVE NEWS TICKER
+            <!-- Single Portal Sentiment View -->
+            <div id="sentimentSingleView" class="space-y-gutter">
+                <!-- Real-time Sentiment Ticker -->
+                <div class="glass-card mb-gutter rounded-xl overflow-hidden flex items-center">
+                    <div class="bg-secondary px-4 py-2 text-on-secondary font-label-md flex items-center gap-2 whitespace-nowrap">
+                        <span class="material-symbols-outlined status-dot text-[16px]" style="font-variation-settings: 'FILL' 1;">radio_button_checked</span>
+                        LIVE NEWS TICKER
+                    </div>
+                    <div class="flex-1 overflow-hidden relative h-10 flex items-center">
+                        <div id="tickerContent" class="absolute whitespace-nowrap flex gap-12 animate-[marquee_30s_linear_infinite]">
+                            <!-- Populated dynamically -->
+                            <span class="flex items-center gap-2 font-data-mono text-body-sm text-on-surface">
+                                <span class="text-tertiary">#NewsOnAir:</span> PM Modi inaugurates new semiconductor facility in Gujarat. <span class="text-tertiary-fixed font-bold">[PRO-GOVT]</span>
+                            </span>
+                            <span class="flex items-center gap-2 font-data-mono text-body-sm text-on-surface">
+                                <span class="text-tertiary">#NewsOnAir:</span> RBI keeps key interest rates stable. <span class="text-secondary font-bold">[NEUTRAL]</span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex-1 overflow-hidden relative h-10 flex items-center">
-                    <div id="tickerContent" class="absolute whitespace-nowrap flex gap-12 animate-[marquee_30s_linear_infinite]">
+                <style>
+                    @keyframes marquee {
+                        0% { transform: translateX(100%); }
+                        100% { transform: translateX(-100%); }
+                    }
+                </style>
+
+                <!-- Bento Grid Layout -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+                    <!-- Overall Sentiment Donut -->
+                    <div class="md:col-span-4 glass-card p-gutter rounded-xl glow-cyan flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-base">
+                                <h3 class="font-headline-md text-headline-md text-on-surface">Global Sentiment</h3>
+                                <span class="material-symbols-outlined text-outline cursor-help" title="Calculated from active news articles dataset.">info</span>
+                            </div>
+                            <div class="relative w-48 h-48 mx-auto my-gutter">
+                                <!-- Dynamic Donut Chart SVG -->
+                                <svg class="w-full h-full -rotate-90" viewbox="0 0 100 100" id="donutSVG">
+                                    <circle cx="50" cy="50" fill="none" r="40" stroke="#1b2b3f" stroke-width="12"></circle>
+                                    <circle id="donutPro" cx="50" cy="50" fill="none" r="40" stroke="#4edea3" stroke-dasharray="0 251.2" stroke-dashoffset="0" stroke-width="12"></circle>
+                                    <circle id="donutNeu" cx="50" cy="50" fill="none" r="40" stroke="#4cd7f6" stroke-dasharray="0 251.2" stroke-dashoffset="0" stroke-width="12"></circle>
+                                    <circle id="donutAnti" cx="50" cy="50" fill="none" r="40" stroke="#ffb4ab" stroke-dasharray="0 251.2" stroke-dashoffset="0" stroke-width="12"></circle>
+                                </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span id="donutPercentage" class="font-display-lg text-headline-lg text-secondary">0%</span>
+                                    <span id="donutLabel" class="font-label-md text-label-md text-outline">Pro-Govt</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3 pt-4 border-t border-outline-variant/10">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-tertiary"></span>
+                                    <span class="font-body-sm text-body-sm">Pro-Government</span>
+                                </div>
+                                <span id="txtProPct" class="font-data-mono text-tertiary">0%</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-secondary"></span>
+                                    <span class="font-body-sm text-body-sm">Neutral</span>
+                                </div>
+                                <span id="txtNeuPct" class="font-data-mono text-secondary">0%</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-error"></span>
+                                    <span class="font-body-sm text-body-sm">Anti-Government</span>
+                                </div>
+                                <span id="txtAntiPct" class="font-data-mono text-error">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trending Topics Table -->
+                    <div class="md:col-span-8 glass-card rounded-xl overflow-hidden flex flex-col">
+                        <div class="p-gutter border-b border-outline-variant/10 flex justify-between items-center">
+                            <h3 class="font-headline-md text-headline-md text-on-surface">Trending Content</h3>
+                            <span id="totalArticlesBadge" class="px-3 py-1 bg-surface-container-high border border-outline-variant/20 rounded font-label-md text-on-surface text-xs">0 Articles</span>
+                        </div>
+                        <div class="flex-1 overflow-auto max-h-[360px]">
+                            <table class="w-full text-left font-body-sm">
+                                <thead class="bg-surface-container-low border-b border-outline-variant/10 sticky top-0">
+                                    <tr>
+                                        <th class="p-4 text-outline font-label-md">Article Title</th>
+                                        <th class="p-4 text-outline font-label-md">Category</th>
+                                        <th class="p-4 text-outline font-label-md">Sentiment</th>
+                                        <th class="p-4 text-outline font-label-md">Confidence</th>
+                                        <th id="thActions" class="p-4 text-outline font-label-md hidden">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="articlesTableBody" class="divide-y divide-outline-variant/5">
+                                    <!-- Populated dynamically -->
+                                    <tr>
+                                        <td colspan="4" class="p-8 text-center text-on-surface-variant">Loading sentiment data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ML Model Evaluation Report Card -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter mt-gutter">
+                    <div class="md:col-span-12 glass-card p-gutter rounded-xl">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-outline-variant/10 pb-4 mb-4">
+                            <div>
+                                <h3 class="font-headline-md text-[18px] font-bold text-primary">NLP Classifier Information</h3>
+                                <p class="text-xs text-on-surface-variant">Trained on programmatically seeded data matching the NewsOnAir guidelines</p>
+                            </div>
+                            <span id="modelStatusTag" class="px-3 py-1 text-xs font-bold rounded-full bg-secondary/10 text-secondary border border-secondary/20 mt-2 sm:mt-0">Fallback Model</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                            <div class="bg-surface-container/50 p-4 rounded border border-outline-variant/10 text-center">
+                                <div class="text-xs text-outline uppercase tracking-wider mb-1">Algorithm</div>
+                                <div id="infoModelName" class="text-sm font-semibold text-on-surface">-</div>
+                            </div>
+                            <div class="bg-surface-container/50 p-4 rounded border border-outline-variant/10 text-center">
+                                <div class="text-xs text-outline uppercase tracking-wider mb-1">Val Accuracy</div>
+                                <div id="infoModelAcc" class="text-sm font-semibold text-tertiary">-</div>
+                            </div>
+                            <div class="bg-surface-container/50 p-4 rounded border border-outline-variant/10 text-center">
+                                <div class="text-xs text-outline uppercase tracking-wider mb-1">Macro F1 Score</div>
+                                <div id="infoModelF1" class="text-sm font-semibold text-secondary">-</div>
+                            </div>
+                            <div class="bg-surface-container/50 p-4 rounded border border-outline-variant/10 text-center">
+                                <div class="text-xs text-outline uppercase tracking-wider mb-1">Last Trained</div>
+                                <div id="infoModelDate" class="text-sm font-semibold text-on-surface">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NLP Insight Cards list -->
+                <div class="mt-gutter">
+                    <h3 class="font-headline-md text-headline-md text-on-surface mb-4">NLP Details &amp; Bias Diagnostics</h3>
+                    <div id="insightCardsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
                         <!-- Populated dynamically -->
-                        <span class="flex items-center gap-2 font-data-mono text-body-sm text-on-surface">
-                            <span class="text-tertiary">#NewsOnAir:</span> PM Modi inaugurates new semiconductor facility in Gujarat. <span class="text-tertiary-fixed font-bold">[PRO-GOVT]</span>
-                        </span>
-                        <span class="flex items-center gap-2 font-data-mono text-body-sm text-on-surface">
-                            <span class="text-tertiary">#NewsOnAir:</span> RBI keeps key interest rates stable. <span class="text-secondary font-bold">[NEUTRAL]</span>
-                        </span>
                     </div>
                 </div>
             </div>
-            <style>
-                @keyframes marquee {
-                    0% { transform: translateX(100%); }
-                    100% { transform: translateX(-100%); }
-                }
-            </style>
 
-            <!-- Bento Grid Layout -->
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
-                <!-- Overall Sentiment Donut -->
-                <div class="md:col-span-4 glass-card p-gutter rounded-xl glow-cyan flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-start mb-base">
-                            <h3 class="font-headline-md text-headline-md text-on-surface">Global Sentiment</h3>
-                            <span class="material-symbols-outlined text-outline cursor-help" title="Calculated from active news articles dataset.">info</span>
+            <!-- Comparative Analytics Dashboard (Comparison View) -->
+            <div id="sentimentComparisonView" class="hidden space-y-gutter">
+                <!-- Comparative Overview Banner -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+                    <div class="glass-card p-gutter rounded-xl flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-outline uppercase tracking-wider block">NewsOnAir GFI</span>
+                            <span id="noaGfiValue" class="text-headline-lg font-bold text-tertiary block mt-1">-%</span>
+                            <span class="text-[10px] text-on-surface-variant">Govt Favourability Index</span>
                         </div>
-                        <div class="relative w-48 h-48 mx-auto my-gutter">
-                            <!-- Dynamic Donut Chart SVG -->
-                            <svg class="w-full h-full -rotate-90" viewbox="0 0 100 100" id="donutSVG">
-                                <circle cx="50" cy="50" fill="none" r="40" stroke="#1b2b3f" stroke-width="12"></circle>
-                                <circle id="donutPro" cx="50" cy="50" fill="none" r="40" stroke="#4edea3" stroke-dasharray="0 251.2" stroke-dashoffset="0" stroke-width="12"></circle>
-                                <circle id="donutNeu" cx="50" cy="50" fill="none" r="40" stroke="#4cd7f6" stroke-dasharray="0 251.2" stroke-dashoffset="0" stroke-width="12"></circle>
-                                <circle id="donutAnti" cx="50" cy="50" fill="none" r="40" stroke="#ffb4ab" stroke-dasharray="0 251.2" stroke-dashoffset="0" stroke-width="12"></circle>
-                            </svg>
-                            <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <span id="donutPercentage" class="font-display-lg text-headline-lg text-secondary">0%</span>
-                                <span id="donutLabel" class="font-label-md text-label-md text-outline">Pro-Govt</span>
-                            </div>
+                        <span class="material-symbols-outlined text-[36px] text-tertiary">analytics</span>
+                    </div>
+                    <div class="glass-card p-gutter rounded-xl flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-outline uppercase tracking-wider block">The Hindu GFI</span>
+                            <span id="hinduGfiValue" class="text-headline-lg font-bold text-error block mt-1">-%</span>
+                            <span class="text-[10px] text-on-surface-variant">Govt Favourability Index</span>
+                        </div>
+                        <span class="material-symbols-outlined text-[36px] text-error">analytics</span>
+                    </div>
+                    <div class="glass-card p-gutter rounded-xl flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-outline uppercase tracking-wider block">Total Analyzed Articles</span>
+                            <span id="totalComparisonArticles" class="text-headline-lg font-bold text-secondary block mt-1">0</span>
+                            <span class="text-[10px] text-on-surface-variant">Combined count for Indian Govt</span>
+                        </div>
+                        <span class="material-symbols-outlined text-[36px] text-secondary">database</span>
+                    </div>
+                </div>
+
+                <!-- Comparison Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+                    <!-- Sentiment Distribution Chart -->
+                    <div class="lg:col-span-6 glass-card p-gutter rounded-xl">
+                        <h3 class="font-headline-md text-headline-md text-on-surface mb-4">Overall Sentiment Distribution</h3>
+                        <div class="h-[280px] w-full flex items-center justify-center">
+                            <canvas id="comparisonDistChart"></canvas>
                         </div>
                     </div>
-                    
-                    <div class="space-y-3 pt-4 border-t border-outline-variant/10">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-tertiary"></span>
-                                <span class="font-body-sm text-body-sm">Pro-Government</span>
-                            </div>
-                            <span id="txtProPct" class="font-data-mono text-tertiary">0%</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-secondary"></span>
-                                <span class="font-body-sm text-body-sm">Neutral</span>
-                            </div>
-                            <span id="txtNeuPct" class="font-data-mono text-secondary">0%</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-error"></span>
-                                <span class="font-body-sm text-body-sm">Anti-Government</span>
-                            </div>
-                            <span id="txtAntiPct" class="font-data-mono text-error">0%</span>
+                    <!-- Polarity Trends Chart -->
+                    <div class="lg:col-span-6 glass-card p-gutter rounded-xl">
+                        <h3 class="font-headline-md text-headline-md text-on-surface mb-4">Timeline Trend Comparison</h3>
+                        <div class="h-[280px] w-full flex items-center justify-center">
+                            <canvas id="comparisonTimelineChart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <!-- Trending Topics Table -->
-                <div class="md:col-span-8 glass-card rounded-xl overflow-hidden flex flex-col">
-                    <div class="p-gutter border-b border-outline-variant/10 flex justify-between items-center">
-                        <h3 class="font-headline-md text-headline-md text-on-surface">Trending Content</h3>
-                        <span id="totalArticlesBadge" class="px-3 py-1 bg-surface-container-high border border-outline-variant/20 rounded font-label-md text-on-surface text-xs">0 Articles</span>
+                <!-- Editorial Analysis Summary Card -->
+                <div class="glass-card p-gutter rounded-xl">
+                    <h3 class="font-headline-md text-[18px] font-bold text-primary mb-3">Portal Bias &amp; Editorial Analysis</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter text-sm text-on-surface-variant">
+                        <div class="space-y-2">
+                            <h4 class="font-semibold text-tertiary">NewsOnAir (Public Broadcaster)</h4>
+                            <p class="text-xs leading-relaxed">
+                                Typically shows a strong positive bias (Pro-Government) in coverage, focusing heavily on policy announcements, inaugurations, and developmental schemes. High compliance with standard government reporting directives and lower critical exposure.
+                            </p>
+                        </div>
+                        <div class="space-y-2 border-l border-outline-variant/10 pl-gutter">
+                            <h4 class="font-semibold text-error">The Hindu (Independent Media)</h4>
+                            <p class="text-xs leading-relaxed">
+                                Exhibits a more critical or neutral reporting profile, often reflecting anti-government protests, investigative critiques, policy failures, and independent opposition reviews. Highlights debates and regulatory disputes with higher frequency.
+                            </p>
+                        </div>
                     </div>
-                    <div class="flex-1 overflow-auto max-h-[360px]">
+                </div>
+
+                <!-- Category Comparison Table -->
+                <div class="glass-card rounded-xl overflow-hidden">
+                    <div class="p-gutter border-b border-outline-variant/10">
+                        <h3 class="font-headline-md text-headline-md text-on-surface">Category-wise Favorability Breakdown</h3>
+                    </div>
+                    <div class="overflow-auto">
                         <table class="w-full text-left font-body-sm">
                             <thead class="bg-surface-container-low border-b border-outline-variant/10 sticky top-0">
                                 <tr>
-                                    <th class="p-4 text-outline font-label-md">Article Title</th>
-                                    <th class="p-4 text-outline font-label-md">Category</th>
-                                    <th class="p-4 text-outline font-label-md">Sentiment</th>
-                                    <th class="p-4 text-outline font-label-md">Confidence</th>
-                                    <th id="thActions" class="p-4 text-outline font-label-md hidden">Actions</th>
+                                    <th class="p-4 text-outline font-label-md">News Category</th>
+                                    <th class="p-4 text-outline font-label-md text-center">NewsOnAir (Pro/Neu/Anti)</th>
+                                    <th class="p-4 text-outline font-label-md text-center">The Hindu (Pro/Neu/Anti)</th>
+                                    <th class="p-4 text-outline font-label-md">Coverage Contrast</th>
                                 </tr>
                             </thead>
-                            <tbody id="articlesTableBody" class="divide-y divide-outline-variant/5">
+                            <tbody id="comparisonCategoryTableBody" class="divide-y divide-outline-variant/5">
                                 <!-- Populated dynamically -->
-                                <tr>
-                                    <td colspan="4" class="p-8 text-center text-on-surface-variant">Loading sentiment data...</td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
-
-            <!-- ML Model Evaluation Report Card -->
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter mt-gutter">
-                <div class="md:col-span-12 glass-card p-gutter rounded-xl">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-outline-variant/10 pb-4 mb-4">
-                        <div>
-                            <h3 class="font-headline-md text-[18px] font-bold text-primary">NLP Classifier Information</h3>
-                            <p class="text-xs text-on-surface-variant">Trained on programmatically seeded data matching the NewsOnAir guidelines</p>
-                        </div>
-                        <span id="modelStatusTag" class="px-3 py-1 text-xs font-bold rounded-full bg-secondary/10 text-secondary border border-secondary/20 mt-2 sm:mt-0">Fallback Model</span>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                        <div class="bg-surface-container/50 p-4 rounded border border-outline-variant/10 text-center">
-                            <div class="text-xs text-outline uppercase tracking-wider mb-1">Algorithm</div>
-                            <div id="infoModelName" class="text-sm font-semibold text-on-surface">-</div>
-                        </div>
-                        <div class="bg-surface-container/50 p-4 rounded border border-outline-variant/10 text-center">
-                            <div class="text-xs text-outline uppercase tracking-wider mb-1">Val Accuracy</div>
-                            <div id="infoModelAcc" class="text-sm font-semibold text-tertiary">-</div>
-                        </div>
-                        <div class="bg-surface-container/50 p-4 rounded border border-outline-variant/10 text-center">
-                            <div class="text-xs text-outline uppercase tracking-wider mb-1">Macro F1 Score</div>
-                            <div id="infoModelF1" class="text-sm font-semibold text-secondary">-</div>
-                        </div>
-                        <div class="bg-surface-container/50 p-4 rounded border border-outline-variant/10 text-center">
-                            <div class="text-xs text-outline uppercase tracking-wider mb-1">Last Trained</div>
-                            <div id="infoModelDate" class="text-sm font-semibold text-on-surface">-</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- NLP Insight Cards list -->
-            <div class="mt-gutter">
-                <h3 class="font-headline-md text-headline-md text-on-surface mb-4">NLP Details &amp; Bias Diagnostics</h3>
-                <div id="insightCardsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-                    <!-- Populated dynamically -->
                 </div>
             </div>
         </div>
